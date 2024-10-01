@@ -8,6 +8,7 @@ import asyncio
 # Inicializa o Firebase
 try:
     service_account_info = json.loads(os.environ['FIREBASE_SERVICE_ACCOUNT_KEY'])
+    service_account_info['private_key'] = service_account_info['private_key'].replace('\\n', '\n')
     cred = credentials.Certificate(service_account_info)
     firebase_admin.initialize_app(cred)
     db = firestore.client()
