@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Canal do Twitch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #282c34;
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #61dafb;
+            border: none;
+            color: black;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        header {
+        background-color: #0c0c0c; /* Cor de fundo do cabeçalho */
+        padding: 20px 0; /* Espaçamento em cima e embaixo */
+        position: sticky; /* Fixa o cabeçalho no topo */
+        top: 0; /* Fixa a posição */
+        width: 100%; /* Largura total */
+        z-index: 1000; /* Garante que o cabeçalho fique acima do conteúdo */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para um efeito de elevação */
+        border-radius: 5px;
+        }
+        nav {
+            display: flex; /* Exibe os links em linha */
+            justify-content: center; /* Centraliza os links */
+            gap: 30px; /* Espaço maior entre os links */
+            font-size: 18px; /* Tamanho da fonte dos links */
+        }
+        nav a {
+            color: #ffffff; /* Cor do texto dos links */
+            text-decoration: none; /* Remove o sublinhado */
+            font-weight: bold; /* Deixa o texto em negrito */
+            padding: 10px 15px; /* Espaçamento dentro dos links */
+            border-radius: 5px; /* Arredonda os cantos */
+            transition: background-color 0.3s, color 0.3s; /* Animações suaves ao passar o mouse */
+        }
+        nav a:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Efeito de hover com cor de fundo */
+            color: #5c0000; /* Altera a cor do texto no hover */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="main.html">Início</a>
+            <a href="help.html">Ajuda</a>
+            <a href="commands.html">Comandos</a>
+        </nav>
+    </header>
+    <div id="main">
+        <h1>Adicionar Canal do Twitch</h1>
+        <input type="text" id="channelName" placeholder="Nome do Canal" required>
+        <button id="addButton">Adicionar Canal</button>
+        <p id="responseMessage"></p>
+    </div>
+
+    <h1 id="alreadyAdd" style="display: none;">Você já adicionou um canal!</h1>
+
+    <script>
+        // Verifica se o usuário já acessou a página
+        function checkAccess() {
+            const visitou = localStorage.getItem('visitou');
+            if (visitou === 'true') {
+                // Oculta a seção principal e exibe a mensagem
+                document.getElementById('main').style.display = 'none';
+                document.getElementById('alreadyAdd').style.display = 'block';
+            } else {
+                // Salva no Local Storage que o usuário acessou
+                localStorage.setItem('visitou', 'true');
+            }
+        }
+
+        // Chama a função checkAccess quando a página é carregada
+        window.onload = checkAccess;
+
+    </script>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3D-DrYHPQjikWZrnar5bEuAsv1RNM114",
+            authDomain: "valocounter-e7a99.firebaseapp.com",
+            databaseURL: "https://valocounter-e7a99-default-rtdb.firebaseio.com",
+            projectId: "valocounter-e7a99",
+            storageBucket: "valocounter-e7a99.appspot.com",
+            messagingSenderId: "293961036850",
+            appId: "1:293961036850:web:ff73cbd0c39e6f225f382b",
+            measurementId: "G-TRV7VR5M96"
+        };
+
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const firestore = getFirestore(app);
+
+        // Função para adicionar um canal ao Firestore
+        async function addChannel() {
+            const channelName = document.getElementById('channelName').value.trim();
+            const responseMessage = document.getElementById('responseMessage');
+            const addButton = document.getElementById('addButton');
+
+            // Verifica se o campo de nome do canal está vazio ou contém caracteres inválidos
+            if (!channelName) {
+                responseMessage.textContent = 'Por favor, insira um nome de canal válido.';
+                return;
+            }
+            if (!/^[a-zA-Z0-9_]+$/.test(channelName)) {
+                responseMessage.textContent = 'O nome do canal deve conter apenas letras, números e underscores.';
+                return;
+            }
+
+            // Desabilita o botão durante o processamento
+            addButton.disabled = true;
+
+            try {
+                // Adiciona o canal ao Firestore
+                await setDoc(doc(firestore, 'channels', channelName), {
+                    name: channelName
+                });
+
+                localStorage.setItem('channelName', channelName);
+                
+                console.log('Canal adicionado:', channelName);
+                responseMessage.textContent = `Canal ${channelName} adicionado com sucesso!`;
+                document.getElementById('channelName').value = '';
+                
+                // Redireciona para "help.html"
+                window.location = "help.html";
+            } catch (error) {
+                console.error('Erro ao adicionar canal:', error);
+                responseMessage.textContent = 'Erro ao adicionar canal: ' + error.message;
+
+                // Exibe mensagem de erro genérica
+                if (error.code === 'permission-denied') {
+                    responseMessage.textContent = 'Você não tem permissão para adicionar este canal.';
+                } else {
+                    responseMessage.textContent = 'Erro inesperado: ' + error.message;
+                }
+            } finally {
+                // Reabilita o botão no final do processamento
+                addButton.disabled = false;
+            }
+        }
+
+        // Adiciona um ouvinte de evento para o botão
+        document.getElementById('addButton').addEventListener('click', addChannel);
+    </script>
+</body>
+</html>

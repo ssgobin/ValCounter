@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comandos do Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #282c34;
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+        header {
+            background-color: #0c0c0c; /* Cor de fundo do cabeçalho */
+            padding: 20px 0; /* Espaçamento em cima e embaixo */
+            position: sticky; /* Fixa o cabeçalho no topo */
+            top: 0; /* Fixa a posição */
+            width: 100%; /* Largura total */
+            z-index: 1000; /* Garante que o cabeçalho fique acima do conteúdo */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para um efeito de elevação */
+            border-radius: 5px;
+        }
+        nav {
+            display: flex; /* Exibe os links em linha */
+            justify-content: center; /* Centraliza os links */
+            gap: 30px; /* Espaço maior entre os links */
+            font-size: 18px; /* Tamanho da fonte dos links */
+        }
+        nav a {
+            color: #ffffff; /* Cor do texto dos links */
+            text-decoration: none; /* Remove o sublinhado */
+            font-weight: bold; /* Deixa o texto em negrito */
+            padding: 10px 15px; /* Espaçamento dentro dos links */
+            border-radius: 5px; /* Arredonda os cantos */
+            transition: background-color 0.3s, color 0.3s; /* Animações suaves ao passar o mouse */
+        }
+        nav a:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Efeito de hover com cor de fundo */
+            color: #5c0000; /* Altera a cor do texto no hover */
+        }
+    </style>
+    <script>
+        // Função para salvar acesso no Local Storage
+        function salvarAcesso() {
+            localStorage.setItem('visitou', 'true'); // Salva que o usuário visitou
+            console.log("Acesso salvo no Local Storage:", localStorage.getItem('visitou'));
+        }
+
+        // Evento DOMContentLoaded para garantir que o DOM esteja pronto
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!localStorage.getItem('visitou')) { // Verifica se o acesso já foi salvo
+                salvarAcesso(); // Salva o acesso se não foi salvo antes
+            } else {
+                console.log("Usuário já acessou antes.");
+            }
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="main.html">Início</a>
+            <a href="help.html">Ajuda</a>
+            <a href="commands.html">Comandos</a>
+        </nav>
+    </header>
+    
+    <h1>Comandos do Bot</h1>
+    
+    <h2>Comandos disponíveis:</h2>
+    <ul>
+        <ul><strong>!vitoria</strong> - Use este comando para registrar uma vitória. Exemplo: <code>!vitoria</code></ul>
+        <ul><strong>!derrota</strong> - Use este comando para registrar uma derrota. Exemplo: <code>!derrota</code></ul>
+        <ul><strong>!registrar</strong> - Use este comando para registrar seu canal e permitir que o bot funcione corretamente (apenas Moderadores). Exemplo: <code>!registrar</code></ul>
+    </ul>
+    
+    <h2>Instruções:</h2>
+    <p>Para usar os comandos, basta digitá-los no chat do seu canal. O bot registrará suas vitórias e derrotas e permitirá que você tenha um controle melhor sobre suas estatísticas!</p>
+</body>
+</html>
