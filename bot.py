@@ -68,25 +68,35 @@ class Bot(commands.Bot):
     async def ganhar(self, ctx):
         user = ctx.author.name
         streamer = ctx.channel.name
-        print(f'Comando "ganhar" recebido de {user}.')  # Log para o comando 'ganhar'
-        await self.atualizar_contagem(streamer, 'vitorias')
-        await ctx.send(f'{streamer} ganhou uma partida!')
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "ganhar" recebido de {user}.')  # Log para o comando 'ganhar'
+            await self.atualizar_contagem(streamer, 'vitorias')
+            await ctx.send(f'{streamer} ganhou uma partida!')
+        else:
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
     @commands.command(name='derrota')
     async def perder(self, ctx):
         user = ctx.author.name
         streamer = ctx.channel.name
-        print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
-        await self.atualizar_contagem(streamer, 'derrotas')
-        await ctx.send(f'{streamer} perdeu uma partida!')
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
+            await self.atualizar_contagem(streamer, 'derrotas')
+            await ctx.send(f'{streamer} perdeu uma partida!')
+        else:
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
     @commands.command(name='registrar')
     async def registrar(self, ctx):
         user = ctx.author.name
         streamer = ctx.channel.name
-        print(f"Tentando registrar o streamer: {streamer}")  # Log de depuração
-        await self.adicionar_streamer(streamer)
-        await ctx.send(f'{streamer} foi registrado com sucesso!')
+
+        if user == streamer:
+            print(f"Tentando registrar o streamer: {streamer}")  # Log de depuração
+            await self.adicionar_streamer(streamer)
+            await ctx.send(f'{streamer} foi registrado com sucesso!')
+        else:
+            await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
 
     async def adicionar_streamer(self, user):
         # Adiciona um novo streamer ao Firestore
