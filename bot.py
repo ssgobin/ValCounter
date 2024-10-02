@@ -67,23 +67,26 @@ class Bot(commands.Bot):
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
         user = ctx.author.name
+        streamer = ctx.channel.name
         print(f'Comando "ganhar" recebido de {user}.')  # Log para o comando 'ganhar'
-        await self.atualizar_contagem(user, 'vitorias')
-        await ctx.send(f'{user} ganhou uma partida!')
+        await self.atualizar_contagem(streamer, 'vitorias')
+        await ctx.send(f'{streamer} ganhou uma partida!')
 
     @commands.command(name='derrota')
     async def perder(self, ctx):
         user = ctx.author.name
+        streamer = ctx.channel.name
         print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
-        await self.atualizar_contagem(user, 'derrotas')
-        await ctx.send(f'{user} perdeu uma partida!')
+        await self.atualizar_contagem(streamer, 'derrotas')
+        await ctx.send(f'{streamer} perdeu uma partida!')
 
     @commands.command(name='registrar')
     async def registrar(self, ctx):
         user = ctx.author.name
-        print(f"Tentando registrar o streamer: {user}")  # Log de depuração
-        await self.adicionar_streamer(user)
-        await ctx.send(f'{user} foi registrado com sucesso!')
+        streamer = ctx.channel.name
+        print(f"Tentando registrar o streamer: {streamer}")  # Log de depuração
+        await self.adicionar_streamer(streamer)
+        await ctx.send(f'{streamer} foi registrado com sucesso!')
 
     async def adicionar_streamer(self, user):
         # Adiciona um novo streamer ao Firestore
