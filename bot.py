@@ -82,7 +82,14 @@ class Bot(commands.Bot):
         if user == streamer or ctx.author.is_mod:
             print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
             await self.atualizar_contagem(streamer, 'derrotas')
-            await ctx.send(f'{streamer} perdeu uma partida!')
+
+            streamer_ref = db.collection('channels').document(streamer)
+            streamer_doc = streamer_ref.get()
+            
+            streamer_data = streamer_doc.to_dict()
+            defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
+
+            await ctx.send(f'{streamer} {defeat_message}')
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
