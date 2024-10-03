@@ -4,6 +4,7 @@ from twitchio.ext import commands
 import firebase_admin
 from firebase_admin import credentials, firestore
 import asyncio
+from datetime import datetime, timedelta
 
 # Inicializa o Firebase
 try:
@@ -21,7 +22,7 @@ class Bot(commands.Bot):
 
     def __init__(self):
         self.initial_channels = []  # Lista de canais iniciais
-        super().__init__(token='gno2xk9rdd28u8io39tydoci6eaftj', prefix='val!')
+        super().__init__(token='gno2xk9rdd28u8io39tydoci6eaftj', prefix='!')
         print("Bot inicializado.")  # Log ao inicializar o bot
 
     async def event_ready(self):
@@ -43,6 +44,29 @@ class Bot(commands.Bot):
     async def add_channels(self):
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
+
+    async def resetar_diariamente(self):
+        while True:
+            now = datetime.now()
+            proximo_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            tempo_ate_reset = (proximo_reset - now).total_seconds()
+
+            print(f"Próximo reset em {tempo_ate_reset / 3600:.2f} horas.")  # Log para indicar o tempo até o próximo reset
+
+            await asyncio.sleep(tempo_ate_reset)  # Espera até meia-noite do próximo dia
+            await self.resetar_contagens()  # Reseta as contagens ao alcançar a meia-noite
+
+    async def resetar_contagens(self):
+        try:
+            print("Resetando contagem de vitórias e derrotas para todos os streamers.")  # Log antes de resetar
+            streamers_ref = db.collection('streamers').stream()
+
+            for streamer in streamers_ref:
+                doc_ref = db.collection('streamers').document(streamer.id)
+                doc_ref.update({'vitorias': 0, 'derrotas': 0})
+                print(f"Contagem resetada para {streamer.id}.")  # Log de sucesso ao resetar cada streamer
+        except Exception as e:
+            print(f"Erro ao resetar contagens: {e}")  # Log de erro
 
     async def ler_canais_iniciais(self):
         # Lê os canais do Firestore
@@ -72,7 +96,7 @@ class Bot(commands.Bot):
 
         streamer_ref = db.collection('streamers').document(streamer)
         streamer_doc = streamer_ref.get()
-            
+
         streamer_data = streamer_doc.to_dict()
         victoryCount = streamer_data.get('vitorias', ' 0')
         lossCount = streamer_data.get('derrotas', ' 0')
