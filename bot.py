@@ -64,6 +64,21 @@ class Bot(commands.Bot):
         print(f"Mensagem recebida de {message.author.name}: {message.content}")  # Log de mensagem recebida
         await self.handle_commands(message)
 
+    @commands.command(name='status')
+    async def status(self, ctx):
+        user = ctx.author.name
+        streamer = ctx.channel.name
+        print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
+
+        streamer_ref = db.collection('streamers').document(streamer)
+        streamer_doc = streamer_ref.get()
+            
+        streamer_data = streamer_doc.to_dict()
+        victoryCount = streamer_data.get('vitorias', ' 0')
+        lossCount = streamer_data.get('derrotas', ' 0')
+
+        await ctx.send(f'{streamer} tem {victoryCount} vitórias e {lossCount} derrotas!')
+
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
         user = ctx.author.name
@@ -111,6 +126,7 @@ class Bot(commands.Bot):
             await ctx.send(f'{streamer} foi registrado com sucesso!')
         else:
             await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
+
 
     async def adicionar_streamer(self, user):
         # Adiciona um novo streamer ao Firestore
