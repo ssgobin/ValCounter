@@ -31,6 +31,7 @@ class Bot(commands.Bot):
         print(f'Canais iniciais carregados: {self.initial_channels}')  # Log para mostrar os canais carregados
         await self.add_channels()  # Adiciona os canais ao bot
         asyncio.create_task(self.monitor_channels())  # Inicia monitoramento dos canais
+        asyncio.create_task(self.resetar_diariamente())
 
     async def monitor_channels(self):
         while True:
@@ -98,8 +99,8 @@ class Bot(commands.Bot):
         streamer_doc = streamer_ref.get()
 
         streamer_data = streamer_doc.to_dict()
-        victoryCount = streamer_data.get('vitorias', ' 0')
-        lossCount = streamer_data.get('derrotas', ' 0')
+        victoryCount = streamer_data.get('vitorias', 0)
+        lossCount = streamer_data.get('derrotas', 0)
 
         await ctx.send(f'{streamer} tem {victoryCount} vitórias e {lossCount} derrotas!')
 
