@@ -124,6 +124,24 @@ class Bot(commands.Bot):
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
+    @commands.command(name='removervitoria')
+    async def removeganhar(self, ctx):
+        user = ctx.author.name
+        streamer = ctx.channel.name
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "removerganhar" recebido de {user}.')  # Log para o comando 'ganhar'
+            await self.remover_contagem(streamer, 'vitorias')
+
+            streamer_ref = db.collection('channels').document(streamer)
+            streamer_doc = streamer_ref.get()
+
+            streamer_data = streamer_doc.to_dict()
+            win_message = streamer_data.get('winMessage', ' ganhou uma partida!')
+
+            await ctx.send(f'{user} removeu uma vitória da contagem!')
+        else:
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
+
     @commands.command(name='derrota')
     async def perder(self, ctx):
         user = ctx.author.name
@@ -139,6 +157,24 @@ class Bot(commands.Bot):
             defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
 
             await ctx.send(f'{streamer} {defeat_message}')
+        else:
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
+
+    @commands.command(name='removerderrota')
+    async def removeperder(self, ctx):
+        user = ctx.author.name
+        streamer = ctx.channel.name
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "removeperder" recebido de {user}.')  # Log para o comando 'perder'
+            await self.remover_contagem(streamer, 'derrotas')
+
+            streamer_ref = db.collection('channels').document(streamer)
+            streamer_doc = streamer_ref.get()
+            
+            streamer_data = streamer_doc.to_dict()
+            defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
+
+            await ctx.send(f'{user} removeu uma derrota da contagem!')
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
@@ -189,6 +225,30 @@ class Bot(commands.Bot):
                     data['vitorias'] += 1
                 else:
                     data['derrotas'] += 1
+                doc_ref.update(data)
+                print(f"Contagem de {tipo} atualizada para {user}.")  # Log de sucesso
+            else:
+                # Caso o streamer não esteja registrado, adiciona um novo
+                print(f"Streamer {user} não encontrado, registrando antes de atualizar contagem.")  # Log para não encontrado
+                await self.adicionar_streamer(user)
+                await self.atualizar_contagem(user, tipo)  # Tenta atualizar a contagem novamente
+        except Exception as e:
+            print(f"Erro ao atualizar contagem para {user}: {e}")  # Log de erro
+
+    async def remover_contagem(self, user, tipo):
+        # Atualiza a contagem no Firestore
+        print(f"Atualizando contagem de {tipo} para {user}...")  # Log antes de atualizar contagem
+        doc_ref = db.collection('streamers').document(user)
+
+        try:
+            doc = doc_ref.get()
+            
+            if doc.exists:
+                data = doc.to_dict()
+                if tipo == 'vitorias':
+                    data['vitorias'] -= 1
+                else:
+                    data['derrotas'] -= 1
                 doc_ref.update(data)
                 print(f"Contagem de {tipo} atualizada para {user}.")  # Log de sucesso
             else:
