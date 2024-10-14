@@ -179,49 +179,49 @@ class Bot(commands.Bot):
         except Exception as e:
             print(f"Erro ao adicionar streamer {user}: {e}")  # Log de erro
 
-@commands.command(name='removervitoria')
-async def removeganhar(self, ctx):
-    user = ctx.author.name
-    streamer = ctx.channel.name
-    if user == streamer or ctx.author.is_mod:
-        print(f'Comando "removerganhar" recebido de {user}.')  # Log para o comando 'ganhar'
-        await self.remover_contagem(streamer, 'vitorias')
-
-        # Verifica a contagem atual de vitórias
-        streamer_ref = db.collection('streamers').document(streamer)
-        streamer_doc = streamer_ref.get()
-        streamer_data = streamer_doc.to_dict()
-        current_wins = streamer_data.get('vitorias', 0)
-
-        if current_wins >= 0:
-            await ctx.send(f'{user} removeu uma vitória da contagem!')
+    @commands.command(name='removervitoria')
+    async def removeganhar(self, ctx):
+        user = ctx.author.name
+        streamer = ctx.channel.name
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "removerganhar" recebido de {user}.')  # Log para o comando 'ganhar'
+            await self.remover_contagem(streamer, 'vitorias')
+    
+            # Verifica a contagem atual de vitórias
+            streamer_ref = db.collection('streamers').document(streamer)
+            streamer_doc = streamer_ref.get()
+            streamer_data = streamer_doc.to_dict()
+            current_wins = streamer_data.get('vitorias', 0)
+    
+            if current_wins >= 0:
+                await ctx.send(f'{user} removeu uma vitória da contagem!')
+            else:
+                await ctx.send(f'A contagem de vitórias já é 0 para {streamer}. Não é possível remover mais vitórias.')
+    
         else:
-            await ctx.send(f'A contagem de vitórias já é 0 para {streamer}. Não é possível remover mais vitórias.')
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
-    else:
-        await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
-
-@commands.command(name='removerderrota')
-async def removeperder(self, ctx):
-    user = ctx.author.name
-    streamer = ctx.channel.name
-    if user == streamer or ctx.author.is_mod:
-        print(f'Comando "removeperder" recebido de {user}.')  # Log para o comando 'perder'
-        await self.remover_contagem(streamer, 'derrotas')
-
-        # Verifica a contagem atual de derrotas
-        streamer_ref = db.collection('streamers').document(streamer)
-        streamer_doc = streamer_ref.get()
-        streamer_data = streamer_doc.to_dict()
-        current_losses = streamer_data.get('derrotas', 0)
-
-        if current_losses >= 0:
-            await ctx.send(f'{user} removeu uma derrota da contagem!')
+    @commands.command(name='removerderrota')
+    async def removeperder(self, ctx):
+        user = ctx.author.name
+        streamer = ctx.channel.name
+        if user == streamer or ctx.author.is_mod:
+            print(f'Comando "removeperder" recebido de {user}.')  # Log para o comando 'perder'
+            await self.remover_contagem(streamer, 'derrotas')
+    
+            # Verifica a contagem atual de derrotas
+            streamer_ref = db.collection('streamers').document(streamer)
+            streamer_doc = streamer_ref.get()
+            streamer_data = streamer_doc.to_dict()
+            current_losses = streamer_data.get('derrotas', 0)
+    
+            if current_losses >= 0:
+                await ctx.send(f'{user} removeu uma derrota da contagem!')
+            else:
+                await ctx.send(f'A contagem de derrotas já é 0 para {streamer}. Não é possível remover mais derrotas.')
+    
         else:
-            await ctx.send(f'A contagem de derrotas já é 0 para {streamer}. Não é possível remover mais derrotas.')
-
-    else:
-        await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
+            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
             
     async def remover_contagem(self, user, tipo):
         # Atualiza a contagem no Firestore
