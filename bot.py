@@ -222,13 +222,19 @@ class Bot(commands.Bot):
 
         try:
             doc = doc_ref.get()
-            
+
             if doc.exists:
                 data = doc.to_dict()
                 if tipo == 'vitorias':
-                    data['vitorias'] -= 1
-                else:
-                    data['derrotas'] -= 1
+                    if data['vitorias'] > 0:  # Verifica se a contagem é maior que 0
+                        data['vitorias'] -= 1
+                    else:
+                        print(f"Contagem de vitórias já é 0 para {user}. Não pode remover.")  # Log informativo
+                else:  # 'derrotas'
+                    if data['derrotas'] > 0:  # Verifica se a contagem é maior que 0
+                        data['derrotas'] -= 1
+                    else:
+                        print(f"Contagem de derrotas já é 0 para {user}. Não pode remover.")  # Log informativo
                 doc_ref.update(data)
                 print(f"Contagem de {tipo} atualizada para {user}.")  # Log de sucesso
             else:
