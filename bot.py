@@ -34,7 +34,6 @@ class Bot(commands.Bot):
         self.escutar_canais()  # Inicia a escuta por mudanças no Firestore
         asyncio.create_task(self.resetar_diariamente())  # Mantém o reset diário
 
-
     # Método para iniciar a escuta no Firestore
     def escutar_canais(self):
         print("Iniciando escuta de canais no Firestore...")  # Log de início da escuta
@@ -46,7 +45,8 @@ class Bot(commands.Bot):
             if sorted(new_channels) != sorted(self.initial_channels):
                 print("Atualizando canais com base nas mudanças detectadas.")
                 self.initial_channels = new_channels  # Atualiza a lista de canais
-                asyncio.create_task(self.add_channels())  # Atualiza os canais do bot
+                # Utilize um loop de eventos para criar a tarefa
+                asyncio.run_coroutine_threadsafe(self.add_channels(), self.loop)  # Atualiza os canais do bot
 
         # Registra o listener no Firestore para o collection 'channels'
         db.collection('channels').on_snapshot(on_snapshot)
@@ -179,7 +179,11 @@ class Bot(commands.Bot):
         except Exception as e:
             print(f"Erro ao adicionar streamer {user}: {e}")  # Log de erro
 
-if __name__ == '__main__':
-    print("Iniciando bot...")  # Log ao iniciar o bot
+# Função para iniciar o bot
+def main():
+    print("Iniciando o bot...")  # Log de início do bot
     bot = Bot()
-    bot.run()
+    bot.run()  # Inicia o bot
+
+if __name__ == "__main__":
+    main()  # Chama a função principal
