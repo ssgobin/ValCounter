@@ -28,26 +28,31 @@ class Bot(commands.Bot):
 
     async def event_ready(self):
         print(f'Bot conectado como {self.nick}')
-        self.initial_channels = await self.ler_canais_iniciais()  # Lê os canais iniciais
-        print(f'Canais iniciais carregados: {self.initial_channels}')  # Log para mostrar os canais carregados
+        await self.ler_canais_iniciais()  # Lê os canais iniciais
         await self.add_channels()  # Adiciona os canais ao bot
-        asyncio.create_task(self.monitor_channels())  # Inicia monitoramento dos canais
-        asyncio.create_task(self.resetar_diariamente())
+        asyncio.create_task(self.resetar_diariamente())  # Inicia o reset diário
+        # Inicia o listener para monitorar adição de novos canais
+        self.iniciar_listener_novos_canais()
 
-    async def monitor_channels(self):
-        while True:
-            await asyncio.sleep(10)  # Espera 10 segundos antes de verificar novamente
-            new_channels = await self.ler_canais_iniciais()  # Verifica os canais novamente
-            if sorted(new_channels) != sorted(self.initial_channels):
-                print("Atualizando canais...")
-                self.initial_channels = new_channels  # Atualiza a lista de canais
-                await self.add_channels()  # Adiciona os novos canais ao bot
+    def iniciar_listener_novos_canais(self):
+        """Inicia o listener do Firestore para detectar quando novos canais forem adicionados."""
+        db.collection('channels').on_snapshot(self.on_channels_snapshot)
+
+    def on_channels_snapshot(self, col_snapshot, changes, read_time):
+        """Callback acionado quando há mudanças na coleção 'channels'."""
+        for change in changes:
+            if change.type.name == 'ADDED':
+                print(f'Novo canal adicionado: {change.document.id}')
+                self.initial_channels.append(change.document.id)
+                asyncio.create_task(self.add_channels())  # Atualiza a lista de canais adicionando o novo
 
     async def add_channels(self):
+        """Adiciona os canais do Firestore ao bot."""
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
 
     async def resetar_diariamente(self):
+        """Função para resetar as contagens de vitórias e derrotas diariamente."""
         fuso_brt = pytz.timezone('America/Sao_Paulo')
         while True:
             now = datetime.now(fuso_brt)
@@ -60,6 +65,7 @@ class Bot(commands.Bot):
             await self.resetar_contagens()  # Reseta as contagens ao alcançar a meia-noite
 
     async def resetar_contagens(self):
+        """Função que reseta a contagem de vitórias e derrotas no Firestore."""
         try:
             print("Resetando contagem de vitórias e derrotas para todos os streamers.")  # Log antes de resetar
             streamers_ref = db.collection('streamers').stream()
@@ -72,19 +78,18 @@ class Bot(commands.Bot):
             print(f"Erro ao resetar contagens: {e}")  # Log de erro
 
     async def ler_canais_iniciais(self):
-        # Lê os canais do Firestore
+        """Lê os canais do Firestore e carrega os canais iniciais."""
         try:
             print("Lendo canais iniciais do Firestore...")  # Log antes de acessar o Firestore
             channels_ref = db.collection('channels').stream()
-            channels = [channel.id for channel in channels_ref]  # Coleta os IDs dos documentos como nomes dos canais
-            print(f'Canais que podem usar o bot: {channels}')  # Log para mostrar quais canais podem usar o bot
-            return channels
+            self.initial_channels = [channel.id for channel in channels_ref]  # Coleta os IDs dos documentos como nomes dos canais
+            print(f'Canais que podem usar o bot: {self.initial_channels}')  # Log para mostrar quais canais podem usar o bot
         except Exception as e:
             print(f"Erro ao ler canais do Firestore: {e}")
-            return []
+            self.initial_channels = []
 
     async def event_message(self, message):
-        # Verifica se o autor da mensagem existe e se não é o próprio bot
+        """Função que lida com mensagens recebidas no chat."""
         if message.author is None or message.author.name.lower() == self.nick.lower():
             return
 
@@ -93,126 +98,55 @@ class Bot(commands.Bot):
 
     @commands.command(name='status')
     async def status(self, ctx):
-        user = ctx.author.name
+        """Comando para mostrar o status de vitórias e derrotas."""
         streamer = ctx.channel.name
-        print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
-
         streamer_ref = db.collection('streamers').document(streamer)
         streamer_doc = streamer_ref.get()
 
-        streamer_data = streamer_doc.to_dict()
-        victoryCount = streamer_data.get('vitorias', 0)
-        lossCount = streamer_data.get('derrotas', 0)
-
-        await ctx.send(f'{streamer} tem {victoryCount} vitórias e {lossCount} derrotas!')
+        if streamer_doc.exists:
+            streamer_data = streamer_doc.to_dict()
+            victoryCount = streamer_data.get('vitorias', 0)
+            lossCount = streamer_data.get('derrotas', 0)
+            await ctx.send(f'{streamer} tem {victoryCount} vitórias e {lossCount} derrotas!')
+        else:
+            await ctx.send(f'{streamer} ainda não está registrado no sistema.')
 
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
+        """Comando para adicionar uma vitória."""
         user = ctx.author.name
         streamer = ctx.channel.name
         if user == streamer or ctx.author.is_mod:
-            print(f'Comando "ganhar" recebido de {user}.')  # Log para o comando 'ganhar'
             await self.atualizar_contagem(streamer, 'vitorias')
-
             streamer_ref = db.collection('channels').document(streamer)
             streamer_doc = streamer_ref.get()
 
-            streamer_data = streamer_doc.to_dict()
-            win_message = streamer_data.get('winMessage', ' ganhou uma partida!')
-
-            await ctx.send(f'{streamer} {win_message}')
-        else:
-            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
-
-    @commands.command(name='removervitoria')
-    async def removeganhar(self, ctx):
-        user = ctx.author.name
-        streamer = ctx.channel.name
-        if user == streamer or ctx.author.is_mod:
-            print(f'Comando "removerganhar" recebido de {user}.')  # Log para o comando 'ganhar'
-            await self.remover_contagem(streamer, 'vitorias')
-
-            streamer_ref = db.collection('channels').document(streamer)
-            streamer_doc = streamer_ref.get()
-
-            streamer_data = streamer_doc.to_dict()
-            win_message = streamer_data.get('winMessage', ' ganhou uma partida!')
-
-            await ctx.send(f'{user} removeu uma vitória da contagem!')
+            if streamer_doc.exists:
+                streamer_data = streamer_doc.to_dict()
+                win_message = streamer_data.get('winMessage', ' ganhou uma partida!')
+                await ctx.send(f'{streamer} {win_message}')
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
     @commands.command(name='derrota')
     async def perder(self, ctx):
+        """Comando para adicionar uma derrota."""
         user = ctx.author.name
         streamer = ctx.channel.name
         if user == streamer or ctx.author.is_mod:
-            print(f'Comando "perder" recebido de {user}.')  # Log para o comando 'perder'
             await self.atualizar_contagem(streamer, 'derrotas')
-
             streamer_ref = db.collection('channels').document(streamer)
             streamer_doc = streamer_ref.get()
-            
-            streamer_data = streamer_doc.to_dict()
-            defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
 
-            await ctx.send(f'{streamer} {defeat_message}')
+            if streamer_doc.exists:
+                streamer_data = streamer_doc.to_dict()
+                defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
+                await ctx.send(f'{streamer} {defeat_message}')
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
-
-    @commands.command(name='removerderrota')
-    async def removeperder(self, ctx):
-        user = ctx.author.name
-        streamer = ctx.channel.name
-        if user == streamer or ctx.author.is_mod:
-            print(f'Comando "removeperder" recebido de {user}.')  # Log para o comando 'perder'
-            await self.remover_contagem(streamer, 'derrotas')
-
-            streamer_ref = db.collection('channels').document(streamer)
-            streamer_doc = streamer_ref.get()
-            
-            streamer_data = streamer_doc.to_dict()
-            defeat_message = streamer_data.get('defeatMessage', ' perdeu uma partida!')
-
-            await ctx.send(f'{user} removeu uma derrota da contagem!')
-        else:
-            await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
-
-    @commands.command(name='registrar')
-    async def registrar(self, ctx):
-        user = ctx.author.name
-        streamer = ctx.channel.name
-
-        if user == streamer:
-            print(f"Tentando registrar o streamer: {streamer}")  # Log de depuração
-            await self.adicionar_streamer(streamer)
-            await ctx.send(f'{streamer} foi registrado com sucesso!')
-        else:
-            await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
-
-
-    async def adicionar_streamer(self, user):
-        # Adiciona um novo streamer ao Firestore
-        print(f"Adicionando streamer {user} ao Firestore...")  # Log antes de adicionar
-        doc_ref = db.collection('streamers').document(user)
-
-        try:
-            doc = doc_ref.get()
-
-            if not doc.exists:
-                print(f"Streamer {user} não encontrado, adicionando ao Firestore...")  # Log de depuração
-                doc_ref.set({
-                    'vitorias': 0,
-                    'derrotas': 0,
-                })
-                print(f"Streamer {user} registrado com sucesso.")  # Log de sucesso
-            else:
-                print(f"Streamer {user} já está registrado.")  # Log de depuração
-        except Exception as e:
-            print(f"Erro ao adicionar streamer {user}: {e}")  # Log de erro
 
     async def atualizar_contagem(self, user, tipo):
-        # Atualiza a contagem no Firestore
+        """Função para atualizar as contagens de vitórias ou derrotas."""
         print(f"Atualizando contagem de {tipo} para {user}...")  # Log antes de atualizar contagem
         doc_ref = db.collection('streamers').document(user)
 
@@ -228,34 +162,9 @@ class Bot(commands.Bot):
                 doc_ref.update(data)
                 print(f"Contagem de {tipo} atualizada para {user}.")  # Log de sucesso
             else:
-                # Caso o streamer não esteja registrado, adiciona um novo
                 print(f"Streamer {user} não encontrado, registrando antes de atualizar contagem.")  # Log para não encontrado
                 await self.adicionar_streamer(user)
-                await self.atualizar_contagem(user, tipo)  # Tenta atualizar a contagem novamente
-        except Exception as e:
-            print(f"Erro ao atualizar contagem para {user}: {e}")  # Log de erro
-
-    async def remover_contagem(self, user, tipo):
-        # Atualiza a contagem no Firestore
-        print(f"Atualizando contagem de {tipo} para {user}...")  # Log antes de atualizar contagem
-        doc_ref = db.collection('streamers').document(user)
-
-        try:
-            doc = doc_ref.get()
-            
-            if doc.exists:
-                data = doc.to_dict()
-                if tipo == 'vitorias':
-                    data['vitorias'] -= 1
-                else:
-                    data['derrotas'] -= 1
-                doc_ref.update(data)
-                print(f"Contagem de {tipo} atualizada para {user}.")  # Log de sucesso
-            else:
-                # Caso o streamer não esteja registrado, adiciona um novo
-                print(f"Streamer {user} não encontrado, registrando antes de atualizar contagem.")  # Log para não encontrado
-                await self.adicionar_streamer(user)
-                await self.atualizar_contagem(user, tipo)  # Tenta atualizar a contagem novamente
+                await self.atualizar_contagem(user, tipo)
         except Exception as e:
             print(f"Erro ao atualizar contagem para {user}: {e}")  # Log de erro
 
