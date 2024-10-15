@@ -1,6 +1,5 @@
 <div>
   <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&width=435&lines=Bem-vindo(a)!;Este+é+o+projeto+ValCounter;Controle+suas+vitórias+e+derrotas;Divirta-se+jogando+Valorant!" alt="Typing SVG" />
-  <img src="https://64.media.tumblr.com/55f57e7f662f882d127784a453d107ca/tumblr_msghlxjj0p1qbu2bao1_400.gif" width="350px" align="right"/>
 </div>
 
 <br><br>
