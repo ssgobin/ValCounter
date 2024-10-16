@@ -152,12 +152,18 @@ class Bot(commands.Bot):
         user = ctx.author.name
         streamer = ctx.channel.name
 
-        if user == streamer:
+        streamer_ref = db.collection('blocked_streamers').document(streamer)
+        streamer_doc = streamer_ref.get()
+
+        if user == streamer and not streamer_doc.exists:
             print(f"Tentando registrar o streamer: {streamer}")  # Log de depuração
             await self.adicionar_streamer(streamer)
             await ctx.send(f'{streamer} foi registrado com sucesso!')
+        elif user == streamer and streamer_doc.exists:
+            await ctx.send(f'{streamer} está bloqueado de usar o bot! Entre em contato para desban.')
         else:
             await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
+
 
     async def adicionar_streamer(self, user):
         # Adiciona um novo streamer ao Firestore
