@@ -74,10 +74,11 @@ class Bot(commands.Bot):
 
             for streamer in streamers_ref:
                 doc_ref = db.collection('streamers').document(streamer.id)
-                doc_ref.update({'vitorias': 0, 'derrotas': 0})
-                print(f"Contagem resetada para {streamer.id}.")  # Log de sucesso ao resetar cada streamer
-        except Exception as e:
-            print(f"Erro ao resetar contagens: {e}")  # Log de erro
+                streamer_data = doc_ref.get().to_dict()  # Obtém os dados do streamer
+                
+                # Verifica se o reset está ativado
+                if streamer_data.get('resetDiarioAtivado'):
+                    doc_ref.update({'vitorias': 0, 'derrotas': 0})
 
     async def ler_canais_iniciais(self):
         try:
