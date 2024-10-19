@@ -207,6 +207,21 @@ class Bot(commands.Bot):
         else:
             await ctx.send(f'Desculpe, {user}, apenas administradores podem usar este comando.')
 
+    @commands.command(name='resetar')
+    async def resetar(self, ctx):
+        streamer = ctx.channel.name
+        print(f'Comando "resetar" recebido.')  # Log para o comando 'resetar'
+
+        streamer_ref = db.collection('streamers').document(streamer)
+        streamer_doc = streamer_ref.get()
+
+        if streamer_doc.exists:
+            # Atualiza as contagens
+            await streamer_ref.update({'vitorias': 0, 'derrotas': 0})
+            await ctx.send(f'As contagens de {streamer} foram resetadas com sucesso!')  # Mensagem de confirmação
+        else:
+            await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
+
     @commands.command(name='removerderrota')
     async def removeperder(self, ctx):
         user = ctx.author.name
