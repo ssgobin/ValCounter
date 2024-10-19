@@ -216,11 +216,13 @@ class Bot(commands.Bot):
         streamer_doc = streamer_ref.get()
 
         if streamer_doc.exists:
-            # Atualiza as contagens
-            await streamer_ref.update({'vitorias': 0, 'derrotas': 0})
-            await ctx.send(f'As contagens de {streamer} foram resetadas com sucesso!')  # Mensagem de confirmação
-        else:
-            await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
+            if streamer_doc.get('resetDiarioAtivado' == False):
+                await streamer_ref.update({'vitorias': 0, 'derrotas': 0})
+                await ctx.send(f'O streamer {streamer} foi resetado.')
+            elif streamer_doc.get('resetDiarioAtivado'):
+                await ctx.send(f'O streamer {streamer} está com o reset automático ativado.')
+            else:
+                await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
 
     @commands.command(name='removerderrota')
     async def removeperder(self, ctx):
