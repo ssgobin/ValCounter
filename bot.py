@@ -242,17 +242,11 @@ class Bot(commands.Bot):
         streamer_ref = db.collection('streamers').document(streamer)
         streamer_doc = streamer_ref.get()
 
-        doc_ref = db.collection('streamers').document(streamer.id)
-        streamer_data = doc_ref.get().to_dict()
-
         if streamer_doc.exists:
-            if streamer_data.get('resetDiarioAtivado') is False:
                 streamer_ref.update({'vitorias': 0, 'derrotas': 0})
                 await ctx.send(f'O streamer {streamer} foi resetado.')
-            elif streamer_data.get('resetDiarioAtivado') is True:
-                await ctx.send(f'O streamer {streamer} está com o reset automático ativado.')
-            else:
-                await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
+        else:
+            await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
             
     async def remover_contagem(self, user, tipo):
         # Atualiza a contagem no Firestore
