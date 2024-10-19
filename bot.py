@@ -23,7 +23,7 @@ class Bot(commands.Bot):
 
     def __init__(self):
         self.initial_channels = []  # Lista de canais iniciais
-        super().__init__(token='gno2xk9rdd28u8io39tydoci6eaftj', prefix='val!')
+        super().__init__(token='gno2xk9rdd28u8io39tydoci6eaftj', prefix='!')
         print("Bot inicializado.")  # Log ao inicializar o bot
 
     async def event_ready(self):
