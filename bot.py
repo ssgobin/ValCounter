@@ -66,6 +66,7 @@ class Bot(commands.Bot):
 
             await asyncio.sleep(tempo_ate_reset)  # Espera até meia-noite do próximo dia
             await self.resetar_contagens()  # Reseta as contagens ao alcançar a meia-noite
+        
 
     async def resetar_contagens(self):
         try:
@@ -79,6 +80,9 @@ class Bot(commands.Bot):
                 # Verifica se o reset está ativado
                 if streamer_data.get('resetDiarioAtivado'):
                     doc_ref.update({'vitorias': 0, 'derrotas': 0})
+
+        except Exception as e:
+            print(f"Erro ao resetar contagens: {e}")  # Log de erro
 
     async def ler_canais_iniciais(self):
         try:
