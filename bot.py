@@ -246,10 +246,10 @@ class Bot(commands.Bot):
         streamer_data = doc_ref.get().to_dict()
 
         if streamer_doc.exists:
-            if streamer_data.get('resetDiarioAtivado' == False):
+            if streamer_data.get('resetDiarioAtivado') is False:
                 streamer_ref.update({'vitorias': 0, 'derrotas': 0})
                 await ctx.send(f'O streamer {streamer} foi resetado.')
-            elif streamer_data.get('resetDiarioAtivado'):
+            elif streamer_data.get('resetDiarioAtivado') is True:
                 await ctx.send(f'O streamer {streamer} está com o reset automático ativado.')
             else:
                 await ctx.send(f'O streamer {streamer} não está registrado.')  # Mensagem de erro
