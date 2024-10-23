@@ -56,13 +56,17 @@ class Bot(commands.Bot):
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
 
-    @routines.routine(minutes=30)
-    async def info():
-        print('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
+    async def send_message(self, message):
+        for channel in self.initial_channels:
+            await self.get_channel(channel).send(message)
 
     @routines.routine(minutes=30)
-    async def discord():
-        print('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
+    async def info(self):
+        await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
+
+    @routines.routine(minutes=30)
+    async def discord(self):
+        await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
 
     async def resetar_diariamente(self):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
