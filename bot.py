@@ -86,12 +86,17 @@ class Bot(commands.Bot):
                 doc_ref = db.collection('streamers').document(streamer.id)
                 streamer_data = doc_ref.get().to_dict()  # Obtém os dados do streamer
                 
+                # Obter o documento do channel associado ao streamer
+                channel_ref = db.collection('channels').document(streamer_data.get('channelId'))
+                channel_data = channel_ref.get().to_dict()  # Obtém os dados do channel
+                
                 # Verifica se o reset está ativado
-                if streamer_data.get('resetDiarioAtivado'):
+                if channel_data and channel_data.get('resetDiarioAtivado'):
                     doc_ref.update({'vitorias': 0, 'derrotas': 0})
 
         except Exception as e:
             print(f"Erro ao resetar contagens: {e}")  # Log de erro
+
 
     async def ler_canais_iniciais(self):
         try:
