@@ -1,6 +1,7 @@
 import os
 import json
 from twitchio.ext import commands
+from twitchio.ext import routines
 import firebase_admin
 from firebase_admin import credentials, firestore
 import asyncio
@@ -54,6 +55,14 @@ class Bot(commands.Bot):
     async def add_channels(self):
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
+
+    @routines.routine(minutes=30)
+    async def info():
+        print('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
+
+    @routines.routine(minutes=30)
+    async def discord():
+        print('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
 
     async def resetar_diariamente(self):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
@@ -118,6 +127,12 @@ class Bot(commands.Bot):
             await ctx.send(f'{streamer} tem {victoryCount} vitórias e {lossCount} derrotas!')
         else:
             await ctx.send(f'O streamer {streamer} não está registrado.')
+
+    @commands.command(name='comandos')
+    async def comandos(self, ctx):
+        streamer = ctx.channel.name
+
+        await ctx.send('Os coamandos do bot são: !status | !vitoria | !derrota | !removervitoria | !removerderrota | !resetar | Para mais detalhes, acesse o site: https://valcounter.netlify.app/commands')
 
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
