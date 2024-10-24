@@ -59,7 +59,11 @@ class Bot(commands.Bot):
 
     async def send_message(self, message):
         for channel in self.initial_channels:
-            await self.get_channel(channel).send(message)
+            channel_obj = self.get_channel(channel)
+            if channel_obj is not None:
+                await channel_obj.send(message)
+            else:
+                print(f"Canal {channel} não encontrado ou o bot não está nesse canal.")
 
     async def rotina_mensagens(self):
         while True:
