@@ -34,6 +34,7 @@ class Bot(commands.Bot):
         await self.add_channels()  # Adiciona os canais ao bot
         self.escutar_canais()  # Inicia a escuta por mudanças no Firestore
         asyncio.create_task(self.resetar_diariamente())  # Mantém o reset diário
+        asyncio.create_task(self.send_message())
 
     # Método para iniciar a escuta no Firestore
     def escutar_canais(self):
@@ -60,7 +61,7 @@ class Bot(commands.Bot):
         for channel in self.initial_channels:
             await self.get_channel(channel).send(message)
 
-    @routines.routine(minutes=30)
+    @routines.routine(minutes=5)
     async def info(self):
         await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
 
