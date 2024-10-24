@@ -34,7 +34,7 @@ class Bot(commands.Bot):
         await self.add_channels()  # Adiciona os canais ao bot
         self.escutar_canais()  # Inicia a escuta por mudanças no Firestore
         asyncio.create_task(self.resetar_diariamente())  # Mantém o reset diário
-        #asyncio.create_task(self.rotina_mensagens())
+        asyncio.create_task(self.rotina_mensagens())
 
     # Método para iniciar a escuta no Firestore
     def escutar_canais(self):
@@ -57,20 +57,20 @@ class Bot(commands.Bot):
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
 
-    #async def send_message(self, message):
-        #for channel in self.initial_channels:
-            #channel_obj = self.get_channel(channel)
-            #if channel_obj is not None:
-                #await channel_obj.send(message)
-            #else:
-                #print(f"Canal {channel} não encontrado ou o bot não está nesse canal.")
+    async def send_message(self, message):
+        for channel in self.initial_channels:
+            channel_obj = self.get_channel(channel)
+            if channel_obj is not None:
+                await channel_obj.send(message)
+            else:
+                print(f"Canal {channel} não encontrado ou o bot não está nesse canal.")
 
-    #async def rotina_mensagens(self):
-        #while True:
-            #await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
-            #await asyncio.sleep(1800)
-            #await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
-            #await asyncio.sleep(1800)
+    async def rotina_mensagens(self):
+        while True:
+            await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
+            await asyncio.sleep(1800)
+            await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
+            await asyncio.sleep(1800)
 
     async def resetar_diariamente(self):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
