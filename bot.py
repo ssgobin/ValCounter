@@ -145,11 +145,28 @@ class Bot(commands.Bot):
 
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
+        streamer = ctx.channel.name
+        channels_ref = db.colletions('channels').document(streamer)
+        channels_doc = channels_ref.get()
+        channel_data = channels_doc.to_dict()
+        streamer_name = channels_doc.id
+        winMessage = channel_data.get('winMessage')
+
         await self.atualizar_contagem(ctx, 'vitorias', ' ganhou uma partida!')
+        await ctx.send(f'{streamer} {winMessage}')
 
     @commands.command(name='derrota')
     async def perder(self, ctx):
+        streamer = ctx.channel.name
+        channels_ref = db.colletions('channels').document(streamer)
+        channels_doc = channels_ref.get()
+        channel_data = channels_doc.to_dict()
+        streamer_name = channels_doc.id
+        defeatMessage = channel_data.get('defeatMessage')
+
         await self.atualizar_contagem(ctx, 'derrotas', ' perdeu uma partida!')
+        await ctx.send(f'{streamer} {defeatMessage}')
+
 
     async def atualizar_contagem(self, ctx, tipo, mensagem):
         user = ctx.author.name
@@ -159,14 +176,16 @@ class Bot(commands.Bot):
             print(f'Comando para atualizar {tipo} recebido de {user}.')  # Log do comando
             streamer_ref = db.collection('streamers').document(streamer)
 
+
+
             try:
                 doc = streamer_ref.get()
-                if doc.exists:
+                if doc.exists:    
+
                     data = doc.to_dict()
                     data[tipo] += 1
                     streamer_ref.update(data)
                     print(f"{tipo.capitalize()} atualizada para {streamer}.")
-                    await ctx.send(f'{streamer} {mensagem}')
                 else:
                     await self.adicionar_streamer(streamer)
                     await ctx.send(f'{streamer} foi registrado e a {tipo} foi atualizada.')
