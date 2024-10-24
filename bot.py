@@ -57,20 +57,20 @@ class Bot(commands.Bot):
         await self.join_channels(self.initial_channels)  # Adiciona os canais ao bot
         print(f'Canais ativos: {self.initial_channels}')  # Log dos canais ativos
 
-    async def send_message(self, message):
-        for channel in self.initial_channels:
-            channel_obj = self.get_channel(channel)
-            if channel_obj is not None:
-                await channel_obj.send(message)
-            else:
-                print(f"Canal {channel} não encontrado ou o bot não está nesse canal.")
+    #async def send_message(self, message):
+        #for channel in self.initial_channels:
+            #channel_obj = self.get_channel(channel)
+            #if channel_obj is not None:
+                #await channel_obj.send(message)
+            #else:
+                #print(f"Canal {channel} não encontrado ou o bot não está nesse canal.")
 
-    async def rotina_mensagens(self):
-        while True:
-            await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
-            await asyncio.sleep(1800)
-            await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
-            await asyncio.sleep(1800)
+    #async def rotina_mensagens(self):
+        #while True:
+            #await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
+            #await asyncio.sleep(1800)
+            #await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
+            #await asyncio.sleep(1800)
 
     async def resetar_diariamente(self):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
@@ -169,7 +169,7 @@ class Bot(commands.Bot):
         defeatMessage = channel_data.get('defeatMessage')
 
         await self.atualizar_contagem(ctx, 'derrotas', ' perdeu uma partida!')
-        await ctx.send(f'{streamer} {defeatMessage}')
+        await ctx.send(f'{streamer} {defeatMessage}', ' perdeu uma partida!')
 
 
     async def atualizar_contagem(self, ctx, tipo, mensagem):
@@ -217,9 +217,14 @@ class Bot(commands.Bot):
             await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
 
 
-    async def adicionar_streamer(self, user):
+    async def adicionar_streamer(self, user, ctx):
         # Adiciona um novo streamer ao Firestore
         print(f"Adicionando streamer {user} ao Firestore...")  # Log antes de adicionar
+
+        streamer = ctx.channel.name
+
+        channel_ref = db.collection('channels').document(streamer)
+
         doc_ref = db.collection('streamers').document(user)
 
         try:
@@ -230,6 +235,11 @@ class Bot(commands.Bot):
                 doc_ref.set({
                     'vitorias': 0,
                     'derrotas': 0,
+                })
+
+                channel_ref.set({
+                    'winMessage': ' ganhou uma partida!',
+                    'defeatMessage': ' perdeu uma partida!',
                 })
                 print(f"Streamer {user} registrado com sucesso.")  # Log de sucesso
             else:
