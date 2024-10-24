@@ -34,7 +34,7 @@ class Bot(commands.Bot):
         await self.add_channels()  # Adiciona os canais ao bot
         self.escutar_canais()  # Inicia a escuta por mudanças no Firestore
         asyncio.create_task(self.resetar_diariamente())  # Mantém o reset diário
-        asyncio.create_task(self.rotina_mensagens())
+        #asyncio.create_task(self.rotina_mensagens())
 
     # Método para iniciar a escuta no Firestore
     def escutar_canais(self):
@@ -217,13 +217,11 @@ class Bot(commands.Bot):
             await ctx.send(f'Desculpe, {user}, apenas o dono do canal pode utilizar esse comando!')
 
 
-    async def adicionar_streamer(self, user, ctx):
+    async def adicionar_streamer(self, user):
         # Adiciona um novo streamer ao Firestore
         print(f"Adicionando streamer {user} ao Firestore...")  # Log antes de adicionar
 
-        streamer = ctx.channel.name
-
-        channel_ref = db.collection('channels').document(streamer)
+        channel_ref = db.collection('channels').document(user)
 
         doc_ref = db.collection('streamers').document(user)
 
