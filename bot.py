@@ -68,9 +68,9 @@ class Bot(commands.Bot):
     async def rotina_mensagens(self):
         while True:
             await self.send_message('ValCounter, o seu bot de contagem! Para mais informações, acesse o site: https://valcounter.netlify.app/')
-            await asyncio.sleep(300)
+            await asyncio.sleep(1800)
             await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
-            await asyncio.sleep(300)
+            await asyncio.sleep(1800)
 
     async def resetar_diariamente(self):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
