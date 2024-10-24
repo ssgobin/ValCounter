@@ -146,7 +146,7 @@ class Bot(commands.Bot):
     @commands.command(name='vitoria')
     async def ganhar(self, ctx):
         streamer = ctx.channel.name
-        channels_ref = db.colletions('channels').document(streamer)
+        channels_ref = db.collections('channels').document(streamer)
         channels_doc = channels_ref.get()
         channel_data = channels_doc.to_dict()
         streamer_name = channels_doc.id
@@ -158,7 +158,7 @@ class Bot(commands.Bot):
     @commands.command(name='derrota')
     async def perder(self, ctx):
         streamer = ctx.channel.name
-        channels_ref = db.colletions('channels').document(streamer)
+        channels_ref = db.collections('channels').document(streamer)
         channels_doc = channels_ref.get()
         channel_data = channels_doc.to_dict()
         streamer_name = channels_doc.id
