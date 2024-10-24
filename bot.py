@@ -236,6 +236,7 @@ class Bot(commands.Bot):
                 })
 
                 channel_ref.set({
+                    'name': user,
                     'winMessage': ' ganhou uma partida!',
                     'defeatMessage': ' perdeu uma partida!',
                 })
