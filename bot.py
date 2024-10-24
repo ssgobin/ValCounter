@@ -169,7 +169,7 @@ class Bot(commands.Bot):
         defeatMessage = channel_data.get('defeatMessage')
 
         await self.atualizar_contagem(ctx, 'derrotas', ' perdeu uma partida!')
-        await ctx.send(f'{streamer} {defeatMessage}', ' perdeu uma partida!')
+        await ctx.send(f'{streamer} {defeatMessage}')
 
 
     async def atualizar_contagem(self, ctx, tipo, mensagem):
