@@ -72,46 +72,46 @@ class Bot(commands.Bot):
             await self.send_message('Se tiver algum problema, ou sugestão, ou deseja ver as atualizações, entre no servidor do discord: https://discord.gg/kmyv5nykt8')
             await asyncio.sleep(1800)
 
-async def resetar_diariamente(self):
-    fuso_brt = pytz.timezone('America/Sao_Paulo')
-    while True:
-        now = datetime.now(fuso_brt)
-        proximo_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-        tempo_ate_reset = (proximo_reset - now).total_seconds()
+    async def resetar_diariamente(self):
+        fuso_brt = pytz.timezone('America/Sao_Paulo')
+        while True:
+            now = datetime.now(fuso_brt)
+            proximo_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            tempo_ate_reset = (proximo_reset - now).total_seconds()
 
-        print(f"Próximo reset em {tempo_ate_reset / 3600:.2f} horas.")  # Log para indicar o tempo até o próximo reset
+            print(f"Próximo reset em {tempo_ate_reset / 3600:.2f} horas.")  # Log para indicar o tempo até o próximo reset
 
-        await asyncio.sleep(tempo_ate_reset)  # Espera até meia-noite do próximo dia
-        await self.resetar_contagens()  # Reseta as contagens ao alcançar a meia-noite
-        
-
-async def resetar_contagens(self):
-    try:
-        print("Iniciando o reset de contagens.")  # Log inicial
-        streamers_ref = db.collection('streamers').stream()
-
-        for streamer in streamers_ref:
-            doc_ref = db.collection('streamers').document(streamer.id)
-            streamer_data = doc_ref.get().to_dict()  # Obtém os dados do streamer
+            await asyncio.sleep(tempo_ate_reset)  # Espera até meia-noite do próximo dia
+            await self.resetar_contagens()  # Reseta as contagens ao alcançar a meia-noite
             
-            print(f"Streamer ID: {streamer.id}, Dados: {streamer_data}")  # Log dos dados do streamer
 
-            if streamer_data:
-                # Obter o documento do canal associado ao streamer
-                channel_ref = db.collection('channels').document(streamer_data.get('channelId'))
-                channel_data = channel_ref.get().to_dict()  # Obtém os dados do channel
+    async def resetar_contagens(self):
+        try:
+            print("Iniciando o reset de contagens.")  # Log inicial
+            streamers_ref = db.collection('streamers').stream()
 
-                print(f"Dados do canal para {streamer_data.get('channelId')}: {channel_data}")  # Log dos dados do canal
+            for streamer in streamers_ref:
+                doc_ref = db.collection('streamers').document(streamer.id)
+                streamer_data = doc_ref.get().to_dict()  # Obtém os dados do streamer
+                
+                print(f"Streamer ID: {streamer.id}, Dados: {streamer_data}")  # Log dos dados do streamer
 
-                # Verifica se o reset está ativado
-                if channel_data and channel_data.get('resetDiarioAtivado'):
-                    print(f"Reset diário ativado para {streamer.id}, resetando vitórias e derrotas.")  # Log antes de resetar
-                    doc_ref.update({'vitorias': 0, 'derrotas': 0})
-                else:
-                    print(f"Reset diário não ativado para {streamer.id}.")  # Log caso o reset não esteja ativado
+                if streamer_data:
+                    # Obter o documento do canal associado ao streamer
+                    channel_ref = db.collection('channels').document(streamer_data.get('channelId'))
+                    channel_data = channel_ref.get().to_dict()  # Obtém os dados do channel
 
-    except Exception as e:
-        print(f"Erro ao resetar contagens: {e}")  # Log de erro
+                    print(f"Dados do canal para {streamer_data.get('channelId')}: {channel_data}")  # Log dos dados do canal
+
+                    # Verifica se o reset está ativado
+                    if channel_data and channel_data.get('resetDiarioAtivado'):
+                        print(f"Reset diário ativado para {streamer.id}, resetando vitórias e derrotas.")  # Log antes de resetar
+                        doc_ref.update({'vitorias': 0, 'derrotas': 0})
+                    else:
+                        print(f"Reset diário não ativado para {streamer.id}.")  # Log caso o reset não esteja ativado
+
+        except Exception as e:
+            print(f"Erro ao resetar contagens: {e}")  # Log de erro
 
 
 
