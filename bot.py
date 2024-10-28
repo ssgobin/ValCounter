@@ -98,10 +98,10 @@ class Bot(commands.Bot):
 
                 if streamer_data:
                     # Obter o documento do canal associado ao streamer
-                    channel_ref = db.collection('channels').document(streamer_data.get('channelId'))
+                    channel_ref = db.collection('channels').document(streamer_data.get('name'))
                     channel_data = channel_ref.get().to_dict()  # Obtém os dados do channel
 
-                    print(f"Dados do canal para {streamer_data.get('channelId')}: {channel_data}")  # Log dos dados do canal
+                    print(f"Dados do canal para {streamer_data.get('name')}: {channel_data}")  # Log dos dados do canal
 
                     # Verifica se o reset está ativado
                     if channel_data and channel_data.get('resetDiarioAtivado'):
