@@ -76,7 +76,7 @@ class Bot(commands.Bot):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
         while True:
             now = datetime.now(fuso_brt)
-            proximo_reset = now.replace(hour=0, minute=13, second=0, microsecond=0) + timedelta(days=0)
+            proximo_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
             tempo_ate_reset = (proximo_reset - now).total_seconds()
 
             print(f"Próximo reset em {tempo_ate_reset / 3600:.2f} horas.")  # Log para indicar o tempo até o próximo reset
