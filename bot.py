@@ -76,7 +76,7 @@ class Bot(commands.Bot):
         fuso_brt = pytz.timezone('America/Sao_Paulo')
         while True:
             now = datetime.now(fuso_brt)
-            proximo_reset = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            proximo_reset = now.replace(hour=0, minute=10, second=0, microsecond=0) + timedelta(days=1)
             tempo_ate_reset = (proximo_reset - now).total_seconds()
 
             print(f"Próximo reset em {tempo_ate_reset / 3600:.2f} horas.")  # Log para indicar o tempo até o próximo reset
@@ -93,15 +93,16 @@ class Bot(commands.Bot):
             for streamer in streamers_ref:
                 doc_ref = db.collection('streamers').document(streamer.id)
                 streamer_data = doc_ref.get().to_dict()  # Obtém os dados do streamer
-                
+
                 print(f"Streamer ID: {streamer.id}, Dados: {streamer_data}")  # Log dos dados do streamer
 
                 if streamer_data:
                     # Obter o documento do canal associado ao streamer
-                    channel_ref = db.collection('channels').document(streamer_data.get('name'))
+                    channel_id = streamer_data.get('name', streamer.id)
+                    channel_ref = db.collection('channels').document(channel_id)
                     channel_data = channel_ref.get().to_dict()  # Obtém os dados do channel
 
-                    print(f"Dados do canal para {streamer_data.get('name')}: {channel_data}")  # Log dos dados do canal
+                    print(f"Dados do canal para {channel_id}: {channel_data}")  # Log dos dados do canal
 
                     # Verifica se o reset está ativado
                     if channel_data and channel_data.get('resetDiarioAtivado'):
