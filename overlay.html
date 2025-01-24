@@ -6,19 +6,40 @@
     <title>Overlay de Vitórias e Derrotas</title>
     <style>
         body { 
-            font-family: Arial, sans-serif; 
-            background: rgba(0, 0, 0, 0.5); 
-            color: white; 
+            font-family: 'Arial', sans-serif; 
+            background-color: transparent; /* Fundo transparente */
+            color: #ffffff; /* Texto branco */
             text-align: center; 
             padding: 20px; 
-            border-radius: 8px; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        #contagem {
-            font-size: 3em;
-        }
+
         h1 {
-            font-size: 2em;
+            font-size: 2.5rem; /* Tamanho maior para o título */
             margin-bottom: 20px;
+            color: #ffffff; /* Branco puro para o título */
+        }
+
+        #contagem {
+            font-size: 2rem; /* Destaque para os números */
+            background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5); /* Sombra suave */
+        }
+
+        span {
+            font-weight: bold; /* Realce nos números */
+            color: #4caf50; /* Verde suave para vitórias */
+        }
+
+        #derrotas {
+            color: #f44336; /* Vermelho suave para derrotas */
         }
     </style>
     <!-- Inclua o Firebase SDK -->
@@ -80,7 +101,6 @@
     </script>
 </head>
 <body>
-    <h1>Contagem de Vitórias e Derrotas</h1>
     <div id="contagem">
         Vitórias: <span id="vitorias">0</span><br>
         Derrotas: <span id="derrotas">0</span>
